@@ -43,6 +43,9 @@ err_def_t command_validation(char *arr)
         It automatically assisn the last character to '\0'  */
     snprintf(st.dr, sizeof(st.dr), "%s", pos);
 
+    // Delete newline if it has
+    st.dr[strcspn(st.dr, "\n")] = '\0';
+
     return STATUS_OK;
 }
 
@@ -87,12 +90,17 @@ err_def_t run_filestat(char *arr)
         return STATUS_ERROR;
     }
 
+    //! Add debug logs
+    printf("DEBUG: path='%s'\n", st.dr);
+    printf("DEBUG length=%zu\n", strlen(st.dr));
+
     // 2. Take the metadata using lstat function
     //* Prototypes of lstat: int lstat(const char *pathname, struct stat *statbuf);
     ret = lstat(st.dr, &info);
     if (ret)
     {
         LOG_E("Failed to read metadata with lstat\r\n");
+        perror("lstat");
         return STATUS_ERROR;
     }
     printf("---------- Metadata from directory ----------\r\n");
@@ -109,4 +117,5 @@ err_def_t run_filestat(char *arr)
 
     // 5. Print out the last time modified
     LOG_I("TIME: The last modified time is: %s", ctime(&info.st_mtime));
+    return STATUS_OK;
 }
